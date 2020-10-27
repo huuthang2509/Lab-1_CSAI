@@ -1,6 +1,8 @@
 import pygame
 import graphUI
 import time
+import math
+from queue import PriorityQueue
 from node_color import white, yellow, black, red, blue, purple, orange, green
 
 """
@@ -119,15 +121,82 @@ def DFS(graph, edges, edge_id, start, goal):
     pass
 
 
+def distance(graph, node_1, node_2):
+    x_1, y_1 = graph[node_1][0]
+    x_2, y_2 = graph[node_2][0]
+    return math.sqrt((x_1 - x_2)**2 + (y_1 - y_2)**2)
+
 def UCS(graph, edges, edge_id, start, goal):
     """
     Uniform Cost Search search
     """
     # TODO: your code
+    # def distance(node_1, node_2):
+    #     return math.sqrt((graph[node_1][0][0] - graph[node_2][0][0])**2 + (graph[node_1][0][1] - graph[node_2][0][1])**2)
+    
     graph[start][2] = white
     graph[start][3] = orange
     graph[goal][3] = purple
     graphUI.updateUI()
+    
+    visited_node = []
+    ucs_node = {start:[start, 0]}
+    ucs_node_temp = PriorityQueue()
+    # def sort_ucs():
+    #     if len(ucs_node_temp) > 1:
+    #         for i in range (0, len(ucs_node_temp) - 1):
+    #             for j in range(1, len(ucs_node_temp)):
+    #                 if ucs_node_temp[i][2] > ucs_node_temp[j][2]:
+    #                     temp = ucs_node_temp[i][2]
+    #                     ucs_node_temp[i][2] = ucs_node_temp[j][2]
+    #                     ucs_node_temp[j][2] = temp
+        # else:
+        #     return
+
+
+    ucs_node_temp.put((0, start))
+    while 1:
+        # print("mmmmmmmmmmmmmmmm")
+        
+        temp = ucs_node_temp.get()
+        print(ucs_node)
+        print(temp)       
+        curr_node = temp[1]
+        if curr_node == goal:
+            break
+        graph[curr_node][2] = white
+        graph[curr_node][3] = yellow
+        graphUI.updateUI()
+        for adjacency_node in graph[curr_node][1]:
+            if adjacency_node not in visited_node:
+                edges[edge_id(curr_node, adjacency_node)][1] = white
+                graph[adjacency_node][3] = red
+                graphUI.updateUI()
+                if (adjacency_node not in ucs_node) or (ucs_node[adjacency_node][1] > ucs_node[curr_node][1] + distance(graph, curr_node, adjacency_node)):
+                    ucs_node.update({adjacency_node: [curr_node, ucs_node[curr_node][1] + distance(graph, curr_node, adjacency_node)]})
+                    ucs_node_temp.put((ucs_node[curr_node][1] + distance(graph, curr_node, adjacency_node), adjacency_node))
+                  
+        visited_node.append(curr_node)
+        graph[curr_node][3] = blue
+        graphUI.updateUI()
+    
+    result_path = [goal]
+    temp = goal
+    while temp != start:
+            for node_temp in ucs_node:
+                if node_temp == temp:
+                    temp = ucs_node[node_temp][0]
+                    result_path.append(temp)
+    for i in range (0, len(result_path) - 1):
+        edges[edge_id(result_path[i], result_path[i+1])][1] = green
+
+    graph[start][3] = orange
+    graph[goal][3] = purple
+    graphUI.updateUI()
+        # print(visited_node)
+        # print(ucs_node)
+        # print("abcdef")
+
     print("Implement Uniform Cost Search algorithm.")
     pass
 
@@ -141,8 +210,54 @@ def AStar(graph, edges, edge_id, start, goal):
     graph[start][3] = orange
     graph[goal][3] = purple
     graphUI.updateUI()
+    
+    visited_node = []
+    ucs_node = {start:[start, 0]}
+    ucs_node_temp = PriorityQueue()
+    ucs_node_temp.put((0, start))
+    while 1:
+        # Ham heuristic h(n) = khoang cach tu truc tiep (euclide) tu node dang xet den node goal
+        # -> f(n) = g(n) + h(n) = tong duong di tu start den node (n) + khoang cach truc tiep (euclide) tu node dang xet den node goal
+        temp = ucs_node_temp.get()
+        print(ucs_node)
+        print(temp)       
+        curr_node = temp[1]
+        if curr_node == goal:
+            break
+        graph[curr_node][2] = white
+        graph[curr_node][3] = yellow
+        graphUI.updateUI()
+        for adjacency_node in graph[curr_node][1]:
+            if adjacency_node not in visited_node:
+                edges[edge_id(curr_node, adjacency_node)][1] = white
+                graph[adjacency_node][3] = red
+                graphUI.updateUI()
+                if (adjacency_node not in ucs_node) or (ucs_node[adjacency_node][1] > ucs_node[curr_node][1] + distance(graph, curr_node, adjacency_node)):
+                    # g(n) = distance(graph, adjacency_node, goal)
+                    ucs_node.update({adjacency_node: [curr_node, ucs_node[curr_node][1] + distance(graph, curr_node, adjacency_node) + distance(graph, adjacency_node, goal)]})
+                    ucs_node_temp.put((ucs_node[curr_node][1] + distance(graph, curr_node, adjacency_node) + distance(graph, adjacency_node, goal), adjacency_node))
+                  
+        visited_node.append(curr_node)
+        graph[curr_node][3] = blue
+        graphUI.updateUI()
+    
+    result_path = [goal]
+    temp = goal
+    while temp != start:
+            for node_temp in ucs_node:
+                if node_temp == temp:
+                    temp = ucs_node[node_temp][0]
+                    result_path.append(temp)
+    for i in range (0, len(result_path) - 1):
+        edges[edge_id(result_path[i], result_path[i+1])][1] = green
+
+    graph[start][3] = orange
+    graph[goal][3] = purple
+    graphUI.updateUI()
+
     print("Implement A* algorithm.")
     pass
+
 
 
 def example_func(graph, edges, edge_id, start, goal):
