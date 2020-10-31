@@ -31,7 +31,7 @@ def BFS(graph, edges, edge_id, start, goal):
 
     while graph[goal][2] != white:      # Lặp đến khi tìm thấy node Goal
         path = list_path.pop(0)     # Lần lượt pop từng path ra để duyệt
-        temp_node = path[-1]        # Node chưa được duyệt đến
+        temp_node = path[-1]        # Node chưa được duyệt
         if graph[temp_node][3] != blue:     # Nếu node có màu blue = node đã đc duyệt
             graph[temp_node][3] = yellow
             graph[temp_node][2] = white
